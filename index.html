@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My VR Experience</title>
+    <script src="https://www.w3.org/2018/webxr/webxr.js"></script>
+    <script src="https://threejs.org/build/three.min.js"></script>
+  </head>
+  <body>
+    <h1>My VR Experience</h1>
+
+    <canvas id="canvas"></canvas>
+
+    <button id="enter-vr-button">Enter VR</button>
+
+    <script>
+      // Get a reference to the canvas
+      var canvas = document.getElementById('canvas');
+
+      // Get a reference to the Enter VR button
+      var enterVRButton = document.getElementById('enter-vr-button');
+
+      // Check if the browser supports the WebXR API
+      if (navigator.xr) {
+        // Add an event listener to the Enter VR button
+        enterVRButton.addEventListener('click', function() {
+          // Request a VR session
+          navigator.xr.requestSession('immersive-vr').then(function(session) {
+            // Get the WebGL rendering context for the canvas
+            var gl = canvas.getContext('webgl');
+
+            // Create a new XRWebGLLayer to render the scene to
+            var layer = new XRWebGLLayer(session, gl);
+
+            // Set the XRWebGLLayer as the session's base layer
+            session.updateRenderState({ baseLayer: layer });
+
+            // Create a new Three.js renderer
+            var renderer = new THREE.WebGLRenderer({ canvas: canvas });
+
+            // Create a new Three.js scene
+            var scene = new THREE.Scene();
+
+            // Create a new Three.js camera
+            var camera = new THREE.PerspectiveCamera();
+
+            // Get the XRDevice, which provides information about the VR device
+            var xrDevice = session.device;
+
+            // Get the XRPose, which represents the VR device's current position and orientation
+            var xrPose = session.getPose(xrDevice);
+
+            // Get the position and orientation from the XRPose
+            var position = xrPose.position;
+            var orientation = xrPose.orientation;
+
+            // Use the position and orientation to update the VR camera's position and orientation
+            camera.position.set(position[0], position[1], position[2]);
+            camera.quaternion.set(orientation[0], orientation[1], orientation[2], orientation[3]);
+
+            // Render the scene
+            renderer.render(scene, camera);
+          });
+        });
+      } else {
+        // Hide the Enter VR button if the browser does not support the WebXR API
+        enterVRButton.style.display = 'none';
+      }
+    </script>
+  </body>
+</html>
